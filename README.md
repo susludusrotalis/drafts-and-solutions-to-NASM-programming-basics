@@ -1,5 +1,5 @@
 # drafts-and-solutions-to-NASM-programming-basics
-My drafts and solutions to exercises from Andrey Stolyarov`s book "Programming basics", namely to the chapter that refers to assembly language programming. All of the programs are written in NASM and can be compiled into 32-bit ELF and linked using following commands:
+Chapter notes and solutions to exercises from Andrey Stolyarov`s book "Programming basics", namely to the chapter that refers to assembly language programming. All of the programs are written in NASM and can be compiled into 32-bit ELF and linked using following commands:
 ```
 nasm -f elf32 -o <filename>.o <filename>.asm
 ld -m elf_i386 -o <filename> <filename>.o
