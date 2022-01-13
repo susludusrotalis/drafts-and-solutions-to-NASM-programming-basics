@@ -117,7 +117,47 @@
 	pop	edi
 	popf
 %endmacro
-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+%macro PRINT_UNSIGNED_INT 1
+    unsigned_to_string:
+        ;prining unsigned_int by dividing by const 10
+        push    eax
+        mov     eax, %1
+        cdq                  ;expands eax to eax:edx
+        
+        mov     ebx, 10         ;CONST
+        xor     ecx, ecx       ;Reset counter of digits in number
+    .div_10: 
+        ;xor     edx, edx        ;Setup for division DX:AX / BX
+        div     ebx             ; -> AX is Quotient, Remainder DX=[0,9]
+        add     edx, "0"         ;Turn into character [0,9] -> ["0","9"]
+        push    edx            ;(1) Save remainder for now
+        inc     ecx             ;One more digit
+        xor     edx, edx
+        test    eax, eax          ;Is quotient zero?
+        jnz     .div_10  ;No, use as next dividend
+        
+        mov     ebx, ecx            ;store ecx
+        xor     eax, eax            ;set eax as counter
+        
+    .load_to_mem:
+        pop     edx
+        mov     [digits + eax], dl
+        inc     eax   
+        loop    .load_to_mem
+        
+        mov     byte [digits + eax], `\n`
+        mov     ecx, ebx            ;restore ecx
+        inc     ecx
+        
+    .print:
+        mov     edx, ecx       ;number length
+        mov     ecx, digits    ;points to stack
+        mov     ebx, 1         ;file descriptor (stdout)
+        mov     eax, 4         ;system call number (sys_write)
+        int     80h		  ;call kernel 
+        pop     eax
+%endmacro
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 %macro FINISH 0-1 0
 	_syscall_exit %1
