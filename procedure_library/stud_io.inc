@@ -165,6 +165,64 @@
         pop     eax
 %endmacro
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+%macro        KERNEL 1-*
+; performs system call with arguments stored in stack
+;(takes maximum of 6 args due to linux limitations on maximum number of args)
+%if  %0 > 1                                 ;registers will be spoiled
+                    push ebx
+    %if %0 > 4
+                    push esi
+                    push edi
+                    push ebp
+    %endif
+%endif
+%rep %0                                     ;load macro args to stack
+    %rotate -1
+                    push dword %1
+%endrep                                     ;load args to registers
+                    pop eax
+%if %0 > 1
+                    pop ebx
+    %if %0 > 2  
+                    pop ecx
+        %if %0 > 3
+                    pop edx
+            %if %0 > 4
+                    pop esi
+                %if %0 > 5
+                    pop edi
+                    %if %0 > 6
+                    pop ebp
+                        %if %0 > 7
+                            %error "Can`t do Linux syscall with 7+ params"
+                        %endif
+                    %endif
+                %endif
+            %endif
+        %endif
+    %endif
+%endif
+                    int 80h
+                    mov ecx, eax                ;if an error occured load its
+                    and ecx, 0fffff000h         ;code to ecx, otherwise ecx is 0
+                    cmp ecx, 0fffff000h     
+                    jne %%ok
+                    mov ecx, eax
+                    neg ecx
+                    mov eax, -1
+                    jmp short %%q
+%%ok:               xor ecx, ecx
+%%q:
+%if %0 > 1
+    %if %0 > 4
+                    pop ebp
+                    pop edi
+                    pop esi
+    %endif
+                    pop ebx
+%endif
+%endmacro
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 %macro FINISH 0-1 0
 	_syscall_exit %1
 %endmacro
