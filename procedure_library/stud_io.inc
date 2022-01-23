@@ -126,8 +126,8 @@
     section .text
     %%unsigned_to_string:
         ;Prining unsigned_int by dividing by const 10
-        push    eax
-        mov     eax, %1
+        push	%1
+        pop	eax
         cdq                           ;expands eax to eax:edx
         
         mov     ebx, 10               ;CONST
@@ -162,7 +162,7 @@
         mov     ebx, 1                ;file descriptor (stdout)
         mov     eax, 4                ;system call number (sys_write)
         int     80h		      ;call kernel 
-        pop     eax
+        
 %endmacro
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 %macro        KERNEL 1-*
